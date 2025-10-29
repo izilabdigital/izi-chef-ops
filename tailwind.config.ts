@@ -22,10 +22,12 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          hover: "hsl(var(--primary-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+          hover: "hsl(var(--secondary-hover))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -56,6 +58,19 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        brand: {
+          tomato: "hsl(var(--tomato-red))",
+          golden: "hsl(var(--golden-yellow))",
+          dark: "hsl(var(--dark-gray))",
+        },
+        status: {
+          pending: "hsl(var(--status-pending))",
+          preparing: "hsl(var(--status-preparing))",
+          ready: "hsl(var(--status-ready))",
+          delivering: "hsl(var(--status-delivering))",
+          completed: "hsl(var(--status-completed))",
+          cancelled: "hsl(var(--status-cancelled))",
         },
       },
       borderRadius: {
