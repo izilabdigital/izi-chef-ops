@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error('Usuário inativo');
       }
       
-      setUser(data);
+      setUser(data as User);
     } catch (error: any) {
       console.error('Error fetching user profile:', error);
       toast.error(error.message || 'Erro ao carregar perfil do usuário');

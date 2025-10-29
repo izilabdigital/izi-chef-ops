@@ -126,23 +126,23 @@ const OrderQueue = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="font-semibold">{order.cliente_nome}</p>
-                <p className="text-sm text-muted-foreground">{order.cliente_telefone}</p>
+                <p className="font-semibold">{order.nome}</p>
+                <p className="text-sm text-muted-foreground">{order.telefone}</p>
               </div>
               
               <div className="space-y-1">
                 <p className="text-sm font-medium">Itens:</p>
-                {Array.isArray(order.items) && order.items.map((item: any, idx: number) => (
+                {Array.isArray(order.itens) && order.itens.map((item: any, idx: number) => (
                   <p key={idx} className="text-sm text-muted-foreground">
                     {item.quantidade}x {item.nome}
                   </p>
                 ))}
               </div>
 
-              {order.observacoes && (
+              {order.complemento && (
                 <div>
                   <p className="text-sm font-medium">Observações:</p>
-                  <p className="text-sm text-muted-foreground">{order.observacoes}</p>
+                  <p className="text-sm text-muted-foreground">{order.complemento}</p>
                 </div>
               )}
 

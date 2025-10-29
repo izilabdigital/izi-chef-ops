@@ -21,20 +21,26 @@ export interface User {
 
 export interface Order {
   id: string;
-  numero_pedido: number;
-  cliente_nome: string;
-  cliente_telefone: string;
-  items: any[];
+  numero_pedido: string;
+  nome: string;
+  telefone: string;
+  itens: any;
   total: number;
-  status: OrderStatus;
-  metodo_pagamento?: string;
-  endereco_entrega?: string;
-  observacoes?: string;
-  pizzaiolo_id?: string;
-  entregador_id?: string;
+  status: string;
+  forma_pagamento: string;
+  rua: string;
+  numero: string;
+  bairro: string;
+  cep: string;
+  estado: string;
+  complemento?: string;
+  cupom?: string;
+  desconto?: number;
+  subtotal: number;
+  taxa_entrega: number;
+  user_id?: string;
   created_at: string;
-  tempo_preparo?: number;
-  tempo_entrega?: number;
+  updated_at: string;
 }
 
 export interface TimeTrack {

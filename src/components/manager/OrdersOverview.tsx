@@ -149,7 +149,7 @@ const OrdersOverview = () => {
                         {order.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">{order.cliente_nome}</p>
+                    <p className="text-sm text-muted-foreground">{order.nome}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-primary">R$ {order.total.toFixed(2)}</p>

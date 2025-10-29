@@ -122,32 +122,28 @@ const DeliveryQueue = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="font-semibold">{order.cliente_nome}</p>
-                <p className="text-sm text-muted-foreground">{order.cliente_telefone}</p>
+                <p className="font-semibold">{order.nome}</p>
+                <p className="text-sm text-muted-foreground">{order.telefone}</p>
               </div>
 
-              {order.endereco_entrega && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 mt-1 text-primary flex-shrink-0" />
-                  <p className="text-sm">{order.endereco_entrega}</p>
-                </div>
-              )}
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-1 text-primary flex-shrink-0" />
+                <p className="text-sm">{order.rua}, {order.numero} - {order.bairro}, {order.cep}</p>
+              </div>
               
               <div className="space-y-1">
                 <p className="text-sm font-medium">Itens:</p>
-                {Array.isArray(order.items) && order.items.map((item: any, idx: number) => (
+                {Array.isArray(order.itens) && order.itens.map((item: any, idx: number) => (
                   <p key={idx} className="text-sm text-muted-foreground">
                     {item.quantidade}x {item.nome}
                   </p>
                 ))}
               </div>
 
-              {order.metodo_pagamento && (
-                <div>
-                  <p className="text-sm font-medium">Pagamento:</p>
-                  <p className="text-sm text-muted-foreground">{order.metodo_pagamento}</p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm font-medium">Pagamento:</p>
+                <p className="text-sm text-muted-foreground">{order.forma_pagamento}</p>
+              </div>
 
               <div className="flex gap-2">
                 {order.status === 'Pronto' && (

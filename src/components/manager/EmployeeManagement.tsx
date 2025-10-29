@@ -20,7 +20,7 @@ const EmployeeManagement = () => {
         .order('nome');
 
       if (error) throw error;
-      setEmployees(data || []);
+      setEmployees((data || []) as User[]);
     } catch (error: any) {
       console.error('Error fetching employees:', error);
     }

@@ -149,6 +149,41 @@ export type Database = {
         }
         Relationships: []
       }
+      ponto_funcionarios: {
+        Row: {
+          created_at: string
+          data: string
+          hora_entrada: string
+          hora_saida: string | null
+          id: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          hora_entrada: string
+          hora_saida?: string | null
+          id?: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          hora_entrada?: string
+          hora_saida?: string | null
+          id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ponto_funcionarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -167,6 +202,39 @@ export type Database = {
           id?: string
           nome?: string
           telefone?: string
+        }
+        Relationships: []
+      }
+      usuarios: {
+        Row: {
+          ativo: boolean
+          cargo: string
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          ponto_em_aberto: boolean | null
+          ultimo_login: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          cargo: string
+          created_at?: string
+          email: string
+          id?: string
+          nome: string
+          ponto_em_aberto?: boolean | null
+          ultimo_login?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          cargo?: string
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          ponto_em_aberto?: boolean | null
+          ultimo_login?: string | null
         }
         Relationships: []
       }
