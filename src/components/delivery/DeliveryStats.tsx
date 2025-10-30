@@ -28,7 +28,8 @@ const DeliveryStats = () => {
         .select('id, total')
         .eq('entregador_id', user.id)
         .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`);
+        .lte('created_at', `${today}T23:59:59`)
+        .returns<{ id: string; total: number }[]>();
 
       if (todayError) throw todayError;
 
@@ -39,7 +40,8 @@ const DeliveryStats = () => {
         .eq('entregador_id', user.id)
         .eq('status', 'Entregue')
         .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`);
+        .lte('created_at', `${today}T23:59:59`)
+        .returns<{ id: string; total: number }[]>();
 
       if (completedError) throw completedError;
 

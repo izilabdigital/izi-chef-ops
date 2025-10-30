@@ -28,7 +28,8 @@ const ProductionStats = () => {
         .select('id')
         .eq('pizzaiolo_id', user.id)
         .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`);
+        .lte('created_at', `${today}T23:59:59`)
+        .returns<{ id: string }[]>();
 
       if (todayError) throw todayError;
 
@@ -39,7 +40,8 @@ const ProductionStats = () => {
         .eq('pizzaiolo_id', user.id)
         .eq('status', 'Pronto')
         .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`);
+        .lte('created_at', `${today}T23:59:59`)
+        .returns<{ id: string }[]>();
 
       if (completedError) throw completedError;
 

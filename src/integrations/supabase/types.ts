@@ -85,6 +85,7 @@ export type Database = {
           created_at: string
           cupom: string | null
           desconto: number | null
+          entregador_id: string | null
           estado: string
           forma_pagamento: string
           id: string
@@ -92,6 +93,7 @@ export type Database = {
           nome: string
           numero: string
           numero_pedido: string
+          pizzaiolo_id: string | null
           rua: string
           status: string
           subtotal: number
@@ -108,6 +110,7 @@ export type Database = {
           created_at?: string
           cupom?: string | null
           desconto?: number | null
+          entregador_id?: string | null
           estado: string
           forma_pagamento: string
           id?: string
@@ -115,6 +118,7 @@ export type Database = {
           nome: string
           numero: string
           numero_pedido: string
+          pizzaiolo_id?: string | null
           rua: string
           status?: string
           subtotal: number
@@ -131,6 +135,7 @@ export type Database = {
           created_at?: string
           cupom?: string | null
           desconto?: number | null
+          entregador_id?: string | null
           estado?: string
           forma_pagamento?: string
           id?: string
@@ -138,6 +143,7 @@ export type Database = {
           nome?: string
           numero?: string
           numero_pedido?: string
+          pizzaiolo_id?: string | null
           rua?: string
           status?: string
           subtotal?: number
@@ -147,7 +153,22 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_entregador_id_fkey"
+            columns: ["entregador_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_pizzaiolo_id_fkey"
+            columns: ["pizzaiolo_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ponto_funcionarios: {
         Row: {
