@@ -11,6 +11,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, nome: string, cargo: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   signIn: async () => {},
+  signUp: async () => {},
   signOut: async () => {},
   refreshUser: async () => {},
 });
@@ -109,6 +111,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const signUp = async (email: string, password: string, nome: string, cargo: UserRole) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            nome,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) throw error;
+      if (!data.user) throw new Error('Erro ao criar usuário');
+
+      // Criar registro na tabela usuarios
+      const { error: usuarioError } = await supabase
+        .from('usuarios')
+        .insert({
+          id: data.user.id,
+          nome,
+          email,
+          cargo,
+          ativo: true
+        });
+
+      if (usuarioError) throw usuarioError;
+
+      toast.success('Conta criada com sucesso!');
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      toast.error(error.message || 'Erro ao criar conta');
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -126,7 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, supabaseUser, session, loading, signIn, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ user, supabaseUser, session, loading, signIn, signUp, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,13 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pizza, Lock, Mail } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Pizza, Lock, Mail, User, Briefcase } from 'lucide-react';
+import { UserRole } from '@/types/database';
 
-const Login = () => {
+const Register = () => {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [cargo, setCargo] = useState<UserRole>('pizzaiolo');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,10 +23,10 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await signIn(email, password);
+      await signUp(email, password, nome, cargo);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Registration failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -36,12 +40,29 @@ const Login = () => {
             <Pizza className="w-12 h-12 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-3xl font-bold text-primary">Izi Chefe</CardTitle>
-            <CardDescription className="text-lg mt-2">Sistema de Produção</CardDescription>
+            <CardTitle className="text-3xl font-bold text-primary">Criar Conta</CardTitle>
+            <CardDescription className="text-lg mt-2">Sistema de Produção Izi Chefe</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="nome" className="text-base">Nome Completo</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  id="nome"
+                  type="text"
+                  placeholder="Seu nome"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-10 h-12"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-base">E-mail</Label>
               <div className="relative">
@@ -58,6 +79,7 @@ const Login = () => {
                 />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password" className="text-base">Senha</Label>
               <div className="relative">
@@ -71,22 +93,41 @@ const Login = () => {
                   required
                   disabled={isLoading}
                   className="pl-10 h-12"
+                  minLength={6}
                 />
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cargo" className="text-base">Cargo</Label>
+              <div className="relative">
+                <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 z-10" />
+                <Select value={cargo} onValueChange={(value) => setCargo(value as UserRole)} disabled={isLoading}>
+                  <SelectTrigger className="pl-10 h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gerente">Gerente</SelectItem>
+                    <SelectItem value="pizzaiolo">Pizzaiolo</SelectItem>
+                    <SelectItem value="entregador">Entregador</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <Button
               type="submit"
               disabled={isLoading}
               className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary-hover transition-all"
             >
-              {isLoading ? 'Entrando...' : 'Entrar'}
+              {isLoading ? 'Criando conta...' : 'Criar Conta'}
             </Button>
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Não tem uma conta?{' '}
-                <Link to="/register" className="text-primary hover:underline font-medium">
-                  Criar conta
+                Já tem uma conta?{' '}
+                <Link to="/login" className="text-primary hover:underline font-medium">
+                  Fazer login
                 </Link>
               </p>
             </div>
@@ -97,4 +138,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
