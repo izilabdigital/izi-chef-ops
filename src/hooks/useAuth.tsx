@@ -113,32 +113,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, nome: string, cargo: UserRole) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             nome,
+            cargo,
           },
           emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
 
       if (error) throw error;
-      if (!data.user) throw new Error('Erro ao criar usuário');
-
-      // Criar registro na tabela usuarios
-      const { error: usuarioError } = await supabase
-        .from('usuarios')
-        .insert({
-          id: data.user.id,
-          nome,
-          email,
-          cargo,
-          ativo: true
-        });
-
-      if (usuarioError) throw usuarioError;
 
       toast.success('Conta criada com sucesso!');
     } catch (error: any) {
