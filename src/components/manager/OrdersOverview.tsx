@@ -54,9 +54,9 @@ const OrdersOverview = () => {
       
       // Calculate stats
       const total = data?.length || 0;
-      const pending = data?.filter(o => o.status === 'Pendente').length || 0;
-      const preparing = data?.filter(o => o.status === 'Em preparo').length || 0;
-      const delivering = data?.filter(o => o.status === 'Em rota de entrega').length || 0;
+      const pending = data?.filter(o => o.status === 'pendente').length || 0;
+      const preparing = data?.filter(o => o.status === 'em preparo').length || 0;
+      const delivering = data?.filter(o => o.status === 'em rota de entrega').length || 0;
       
       setStats({ total, pending, preparing, delivering });
     } catch (error: any) {
@@ -66,17 +66,17 @@ const OrdersOverview = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Pendente':
+      case 'pendente':
         return 'bg-status-pending';
-      case 'Em preparo':
+      case 'em preparo':
         return 'bg-status-preparing';
-      case 'Pronto':
+      case 'pronto':
         return 'bg-status-ready';
-      case 'Em rota de entrega':
+      case 'em rota de entrega':
         return 'bg-status-delivering';
-      case 'Entregue':
+      case 'entregue':
         return 'bg-status-completed';
-      case 'Cancelado':
+      case 'cancelado':
         return 'bg-status-cancelled';
       default:
         return 'bg-muted';

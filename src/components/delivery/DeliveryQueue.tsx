@@ -25,7 +25,7 @@ const DeliveryQueue = () => {
           event: '*',
           schema: 'public',
           table: 'pedidos',
-          filter: `status=in.(Pronto,Em rota de entrega)`,
+          filter: `status=in.(pronto,em rota de entrega)`,
         },
         () => {
           fetchOrders();
@@ -43,7 +43,7 @@ const DeliveryQueue = () => {
       const { data, error } = await supabase
         .from('pedidos')
         .select('*')
-        .in('status', ['Pronto', 'Em rota de entrega'])
+        .in('status', ['pronto', 'em rota de entrega'])
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -56,10 +56,10 @@ const DeliveryQueue = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: 'Em rota de entrega' | 'Entregue') => {
+  const updateOrderStatus = async (orderId: string, newStatus: 'em rota de entrega' | 'entregue') => {
     try {
       const updates: any = { status: newStatus };
-      if (newStatus === 'Em rota de entrega' && user) {
+      if (newStatus === 'em rota de entrega' && user) {
         updates.entregador_id = user.id;
       }
 
@@ -78,9 +78,9 @@ const DeliveryQueue = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Pronto':
+      case 'pronto':
         return 'bg-status-ready';
-      case 'Em rota de entrega':
+      case 'em rota de entrega':
         return 'bg-status-delivering';
       default:
         return 'bg-muted';
@@ -146,18 +146,18 @@ const DeliveryQueue = () => {
               </div>
 
               <div className="flex gap-2">
-                {order.status === 'Pronto' && (
+                {order.status === 'pronto' && (
                   <Button
-                    onClick={() => updateOrderStatus(order.id, 'Em rota de entrega')}
+                    onClick={() => updateOrderStatus(order.id, 'em rota de entrega')}
                     className="gap-2 bg-status-delivering hover:opacity-90"
                   >
                     <Truck className="w-4 h-4" />
                     Iniciar Entrega
                   </Button>
                 )}
-                {order.status === 'Em rota de entrega' && (
+                {order.status === 'em rota de entrega' && (
                   <Button
-                    onClick={() => updateOrderStatus(order.id, 'Entregue')}
+                    onClick={() => updateOrderStatus(order.id, 'entregue')}
                     className="gap-2 bg-status-completed hover:opacity-90"
                   >
                     <CheckCircle className="w-4 h-4" />

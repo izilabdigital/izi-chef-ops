@@ -25,7 +25,7 @@ const OrderQueue = () => {
           event: '*',
           schema: 'public',
           table: 'pedidos',
-          filter: `status=in.(Pendente,Em preparo)`,
+          filter: `status=in.(pendente,em preparo)`,
         },
         () => {
           fetchOrders();
@@ -43,7 +43,7 @@ const OrderQueue = () => {
       const { data, error } = await supabase
         .from('pedidos')
         .select('*')
-        .in('status', ['Pendente', 'Em preparo'])
+        .in('status', ['pendente', 'em preparo'])
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -56,10 +56,10 @@ const OrderQueue = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: 'Em preparo' | 'Pronto') => {
+  const updateOrderStatus = async (orderId: string, newStatus: 'em preparo' | 'pronto') => {
     try {
       const updates: any = { status: newStatus };
-      if (newStatus === 'Em preparo' && user) {
+      if (newStatus === 'em preparo' && user) {
         updates.pizzaiolo_id = user.id;
       }
 
@@ -78,9 +78,9 @@ const OrderQueue = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Pendente':
+      case 'pendente':
         return 'bg-status-pending';
-      case 'Em preparo':
+      case 'em preparo':
         return 'bg-status-preparing';
       default:
         return 'bg-muted';
@@ -147,18 +147,18 @@ const OrderQueue = () => {
               )}
 
               <div className="flex gap-2">
-                {order.status === 'Pendente' && (
+                {order.status === 'pendente' && (
                   <Button
-                    onClick={() => updateOrderStatus(order.id, 'Em preparo')}
+                    onClick={() => updateOrderStatus(order.id, 'em preparo')}
                     className="gap-2 bg-primary hover:bg-primary-hover"
                   >
                     <ChefHat className="w-4 h-4" />
                     Iniciar Preparo
                   </Button>
                 )}
-                {order.status === 'Em preparo' && (
+                {order.status === 'em preparo' && (
                   <Button
-                    onClick={() => updateOrderStatus(order.id, 'Pronto')}
+                    onClick={() => updateOrderStatus(order.id, 'pronto')}
                     className="gap-2 bg-status-ready hover:opacity-90"
                   >
                     <Check className="w-4 h-4" />
