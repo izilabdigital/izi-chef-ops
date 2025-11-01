@@ -139,31 +139,51 @@ const MenuManagement = () => {
       const productData: any = {
         nome: formData.nome,
         descricao: formData.descricao || null,
-        preco: parseFloat(formData.preco),
         imagem_url: formData.imagem_url || null,
         categoria: formData.categoria,
         disponivel: formData.disponivel,
         desconto_percentual: parseInt(formData.desconto_percentual) || 0,
         validade_promocao: formData.validade_promocao || null,
+        ingredientes: [],
+        tamanhos: [],
+        itens_combo: [],
+        tipo_embalagem: null,
+        e_sobremesa: false,
       };
 
       // Adicionar campos específicos por categoria
       if (formData.categoria === 'pizza') {
-        productData.ingredientes = formData.ingredientes;
-        productData.tamanhos = formData.tamanhos.map(t => ({
-          tamanho: t.tamanho,
-          preco: parseFloat(t.preco || '0')
-        }));
+        productData.ingredientes = formData.ingredientes || [];
+        const tamanhosValidos = formData.tamanhos.filter(t => t.preco && parseFloat(t.preco) > 0);
+        if (tamanhosValidos.length > 0) {
+          productData.tamanhos = tamanhosValidos.map(t => ({
+            tamanho: t.tamanho,
+            preco: parseFloat(t.preco)
+          }));
+          productData.preco = 0;
+        } else {
+          productData.preco = parseFloat(formData.preco) || 0;
+        }
       } else if (formData.categoria === 'combo') {
-        productData.itens_combo = formData.itens_combo;
+        productData.itens_combo = formData.itens_combo || [];
+        productData.preco = parseFloat(formData.preco) || 0;
       } else if (formData.categoria === 'bebida') {
-        productData.tipo_embalagem = formData.tipo_embalagem;
-        productData.tamanhos = formData.tamanhos.map(t => ({
-          tamanho: t.tamanho,
-          preco: parseFloat(t.preco || '0')
-        }));
+        productData.tipo_embalagem = formData.tipo_embalagem || null;
+        const tamanhosValidos = formData.tamanhos.filter(t => t.preco && parseFloat(t.preco) > 0);
+        if (tamanhosValidos.length > 0) {
+          productData.tamanhos = tamanhosValidos.map(t => ({
+            tamanho: t.tamanho,
+            preco: parseFloat(t.preco)
+          }));
+          productData.preco = 0;
+        } else {
+          productData.preco = parseFloat(formData.preco) || 0;
+        }
       } else if (formData.categoria === 'sobremesa') {
-        productData.e_sobremesa = formData.e_sobremesa;
+        productData.e_sobremesa = true;
+        productData.preco = parseFloat(formData.preco) || 0;
+      } else {
+        productData.preco = parseFloat(formData.preco) || 0;
       }
 
       if (editingProduct) {
