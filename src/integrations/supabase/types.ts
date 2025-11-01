@@ -212,10 +212,15 @@ export type Database = {
           desconto_percentual: number | null
           descricao: string | null
           disponivel: boolean
+          e_sobremesa: boolean | null
           id: string
           imagem_url: string | null
+          ingredientes: Json | null
+          itens_combo: Json | null
           nome: string
           preco: number
+          tamanhos: Json | null
+          tipo_embalagem: string | null
           updated_at: string
           validade_promocao: string | null
         }
@@ -225,10 +230,15 @@ export type Database = {
           desconto_percentual?: number | null
           descricao?: string | null
           disponivel?: boolean
+          e_sobremesa?: boolean | null
           id?: string
           imagem_url?: string | null
+          ingredientes?: Json | null
+          itens_combo?: Json | null
           nome: string
           preco: number
+          tamanhos?: Json | null
+          tipo_embalagem?: string | null
           updated_at?: string
           validade_promocao?: string | null
         }
@@ -238,10 +248,15 @@ export type Database = {
           desconto_percentual?: number | null
           descricao?: string | null
           disponivel?: boolean
+          e_sobremesa?: boolean | null
           id?: string
           imagem_url?: string | null
+          ingredientes?: Json | null
+          itens_combo?: Json | null
           nome?: string
           preco?: number
+          tamanhos?: Json | null
+          tipo_embalagem?: string | null
           updated_at?: string
           validade_promocao?: string | null
         }

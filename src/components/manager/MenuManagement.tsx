@@ -22,6 +22,27 @@ interface Product {
   disponivel: boolean;
   desconto_percentual: number;
   validade_promocao: string | null;
+  ingredientes?: string[];
+  tamanhos?: { tamanho: string; preco: number }[];
+  itens_combo?: string[];
+  tipo_embalagem?: string;
+  e_sobremesa?: boolean;
+}
+
+interface FormDataType {
+  nome: string;
+  descricao: string;
+  preco: string;
+  imagem_url: string;
+  categoria: string;
+  disponivel: boolean;
+  desconto_percentual: string;
+  validade_promocao: string;
+  ingredientes: string[];
+  tamanhos: { tamanho: string; preco: string }[];
+  itens_combo: string[];
+  tipo_embalagem: string;
+  e_sobremesa: boolean;
 }
 
 const MenuManagement = () => {
@@ -29,7 +50,7 @@ const MenuManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataType>({
     nome: '',
     descricao: '',
     preco: '',
@@ -38,15 +59,38 @@ const MenuManagement = () => {
     disponivel: true,
     desconto_percentual: '0',
     validade_promocao: '',
+    ingredientes: [],
+    tamanhos: [{ tamanho: 'M', preco: '' }],
+    itens_combo: [],
+    tipo_embalagem: '',
+    e_sobremesa: false,
   });
+  const [newIngredient, setNewIngredient] = useState('');
+  const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
+
+  // Resetar campos específicos quando categoria mudar
+  useEffect(() => {
+    if (!editingProduct) {
+      setFormData(prev => ({
+        ...prev,
+        ingredientes: [],
+        tamanhos: [{ tamanho: 'M', preco: '' }],
+        itens_combo: [],
+        tipo_embalagem: '',
+        e_sobremesa: false,
+      }));
+    }
+  }, [formData.categoria, editingProduct]);
 
   useEffect(() => {
     fetchProducts();
+    fetchAvailableProducts();
     
     const channel = supabase
       .channel('products-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
         fetchProducts();
+        fetchAvailableProducts();
       })
       .subscribe();
 
@@ -64,7 +108,7 @@ const MenuManagement = () => {
         .order('nome', { ascending: true });
 
       if (error) throw error;
-      setProducts(data || []);
+      setProducts((data || []) as unknown as Product[]);
     } catch (error: any) {
       console.error('Error fetching products:', error);
       toast.error('Erro ao carregar produtos');
@@ -73,11 +117,26 @@ const MenuManagement = () => {
     }
   };
 
+  const fetchAvailableProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*')
+        .eq('disponivel', true)
+        .order('nome', { ascending: true });
+
+      if (error) throw error;
+      setAvailableProducts((data || []) as unknown as Product[]);
+    } catch (error: any) {
+      console.error('Error fetching available products:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const productData = {
+      const productData: any = {
         nome: formData.nome,
         descricao: formData.descricao || null,
         preco: parseFloat(formData.preco),
@@ -87,6 +146,25 @@ const MenuManagement = () => {
         desconto_percentual: parseInt(formData.desconto_percentual) || 0,
         validade_promocao: formData.validade_promocao || null,
       };
+
+      // Adicionar campos específicos por categoria
+      if (formData.categoria === 'pizza') {
+        productData.ingredientes = formData.ingredientes;
+        productData.tamanhos = formData.tamanhos.map(t => ({
+          tamanho: t.tamanho,
+          preco: parseFloat(t.preco || '0')
+        }));
+      } else if (formData.categoria === 'combo') {
+        productData.itens_combo = formData.itens_combo;
+      } else if (formData.categoria === 'bebida') {
+        productData.tipo_embalagem = formData.tipo_embalagem;
+        productData.tamanhos = formData.tamanhos.map(t => ({
+          tamanho: t.tamanho,
+          preco: parseFloat(t.preco || '0')
+        }));
+      } else if (formData.categoria === 'sobremesa') {
+        productData.e_sobremesa = formData.e_sobremesa;
+      }
 
       if (editingProduct) {
         const { error } = await supabase
@@ -156,6 +234,11 @@ const MenuManagement = () => {
       disponivel: product.disponivel,
       desconto_percentual: product.desconto_percentual.toString(),
       validade_promocao: product.validade_promocao || '',
+      ingredientes: product.ingredientes || [],
+      tamanhos: product.tamanhos?.map(t => ({ tamanho: t.tamanho, preco: t.preco.toString() })) || [{ tamanho: 'M', preco: '' }],
+      itens_combo: product.itens_combo || [],
+      tipo_embalagem: product.tipo_embalagem || '',
+      e_sobremesa: product.e_sobremesa || false,
     });
     setIsDialogOpen(true);
   };
@@ -171,7 +254,63 @@ const MenuManagement = () => {
       disponivel: true,
       desconto_percentual: '0',
       validade_promocao: '',
+      ingredientes: [],
+      tamanhos: [{ tamanho: 'M', preco: '' }],
+      itens_combo: [],
+      tipo_embalagem: '',
+      e_sobremesa: false,
     });
+    setNewIngredient('');
+  };
+
+  const addIngredient = () => {
+    if (newIngredient.trim()) {
+      setFormData({ ...formData, ingredientes: [...formData.ingredientes, newIngredient.trim()] });
+      setNewIngredient('');
+    }
+  };
+
+  const removeIngredient = (index: number) => {
+    setFormData({ 
+      ...formData, 
+      ingredientes: formData.ingredientes.filter((_, i) => i !== index) 
+    });
+  };
+
+  const addTamanho = () => {
+    setFormData({ 
+      ...formData, 
+      tamanhos: [...formData.tamanhos, { tamanho: '', preco: '' }] 
+    });
+  };
+
+  const removeTamanho = (index: number) => {
+    if (formData.tamanhos.length > 1) {
+      setFormData({ 
+        ...formData, 
+        tamanhos: formData.tamanhos.filter((_, i) => i !== index) 
+      });
+    }
+  };
+
+  const updateTamanho = (index: number, field: 'tamanho' | 'preco', value: string) => {
+    const newTamanhos = [...formData.tamanhos];
+    newTamanhos[index] = { ...newTamanhos[index], [field]: value };
+    setFormData({ ...formData, tamanhos: newTamanhos });
+  };
+
+  const toggleComboItem = (productId: string) => {
+    if (formData.itens_combo.includes(productId)) {
+      setFormData({ 
+        ...formData, 
+        itens_combo: formData.itens_combo.filter(id => id !== productId) 
+      });
+    } else {
+      setFormData({ 
+        ...formData, 
+        itens_combo: [...formData.itens_combo, productId] 
+      });
+    }
   };
 
   if (loading) {
@@ -235,14 +374,16 @@ const MenuManagement = () => {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="preco">Preço (R$) *</Label>
+                  <Label htmlFor="preco">
+                    Preço Base (R$) {(formData.categoria === 'pizza' || formData.categoria === 'bebida') && formData.tamanhos.length > 0 ? '(Opcional)' : '*'}
+                  </Label>
                   <Input
                     id="preco"
                     type="number"
                     step="0.01"
                     value={formData.preco}
                     onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
-                    required
+                    required={!(formData.categoria === 'pizza' || formData.categoria === 'bebida') || formData.tamanhos.length === 0}
                   />
                 </div>
                 <div className="space-y-2">
@@ -277,6 +418,185 @@ const MenuManagement = () => {
                   onChange={(e) => setFormData({ ...formData, validade_promocao: e.target.value })}
                 />
               </div>
+
+              {/* Campos específicos por categoria */}
+              
+              {/* PIZZA: Ingredientes e Tamanhos */}
+              {formData.categoria === 'pizza' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Ingredientes</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newIngredient}
+                        onChange={(e) => setNewIngredient(e.target.value)}
+                        placeholder="Ex: Mussarela, Calabresa..."
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addIngredient())}
+                      />
+                      <Button type="button" onClick={addIngredient} size="sm">
+                        Adicionar
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.ingredientes.map((ing, index) => (
+                        <Badge key={index} variant="secondary" className="gap-1">
+                          {ing}
+                          <button
+                            type="button"
+                            onClick={() => removeIngredient(index)}
+                            className="ml-1 hover:text-destructive"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Tamanhos e Preços</Label>
+                    {formData.tamanhos.map((tamanho, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Select
+                          value={tamanho.tamanho}
+                          onValueChange={(value) => updateTamanho(index, 'tamanho', value)}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Tamanho" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="P">P</SelectItem>
+                            <SelectItem value="M">M</SelectItem>
+                            <SelectItem value="G">G</SelectItem>
+                            <SelectItem value="GG">GG</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Preço"
+                          value={tamanho.preco}
+                          onChange={(e) => updateTamanho(index, 'preco', e.target.value)}
+                          className="flex-1"
+                        />
+                        {formData.tamanhos.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeTamanho(index)}
+                          >
+                            Remover
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={addTamanho}>
+                      + Adicionar Tamanho
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {/* COMBO: Seleção de Produtos */}
+              {formData.categoria === 'combo' && (
+                <div className="space-y-2">
+                  <Label>Produtos no Combo</Label>
+                  <div className="border rounded-md p-4 max-h-60 overflow-y-auto space-y-2">
+                    {availableProducts
+                      .filter(p => p.id !== editingProduct?.id)
+                      .map((product) => (
+                        <div key={product.id} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`combo-${product.id}`}
+                            checked={formData.itens_combo.includes(product.id)}
+                            onChange={() => toggleComboItem(product.id)}
+                            className="rounded"
+                          />
+                          <Label htmlFor={`combo-${product.id}`} className="flex-1 cursor-pointer">
+                            {product.nome} - {product.categoria} - R$ {product.preco.toFixed(2)}
+                          </Label>
+                        </div>
+                      ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.itens_combo.length} produto(s) selecionado(s)
+                  </p>
+                </div>
+              )}
+
+              {/* BEBIDA: Tipo de Embalagem e Tamanhos */}
+              {formData.categoria === 'bebida' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="tipo_embalagem">Tipo de Embalagem</Label>
+                    <Select
+                      value={formData.tipo_embalagem}
+                      onValueChange={(value) => setFormData({ ...formData, tipo_embalagem: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Lata 350ml">Lata 350ml</SelectItem>
+                        <SelectItem value="Garrafa 600ml">Garrafa 600ml</SelectItem>
+                        <SelectItem value="Garrafa 1L">Garrafa 1L</SelectItem>
+                        <SelectItem value="Garrafa 2L">Garrafa 2L</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Variações de Tamanho (Opcional)</Label>
+                    {formData.tamanhos.map((tamanho, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          placeholder="Ex: 350ml, 1L..."
+                          value={tamanho.tamanho}
+                          onChange={(e) => updateTamanho(index, 'tamanho', e.target.value)}
+                          className="flex-1"
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Preço"
+                          value={tamanho.preco}
+                          onChange={(e) => updateTamanho(index, 'preco', e.target.value)}
+                          className="w-32"
+                        />
+                        {formData.tamanhos.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeTamanho(index)}
+                          >
+                            Remover
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={addTamanho}>
+                      + Adicionar Variação
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {/* SOBREMESA: Toggle */}
+              {formData.categoria === 'sobremesa' && (
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="e_sobremesa"
+                    checked={formData.e_sobremesa}
+                    onCheckedChange={(checked) => setFormData({ ...formData, e_sobremesa: checked })}
+                  />
+                  <Label htmlFor="e_sobremesa">
+                    Este produto também pode ser usado como sobremesa
+                  </Label>
+                </div>
+              )}
 
               <div className="flex items-center space-x-2">
                 <Switch
