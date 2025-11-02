@@ -77,6 +77,35 @@ export type Database = {
         }
         Relationships: []
       }
+      favoritos: {
+        Row: {
+          created_at: string
+          id: string
+          produto_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          produto_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          produto_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favoritos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedidos: {
         Row: {
           bairro: string
@@ -264,21 +293,39 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bairro: string | null
+          cep: string | null
+          complemento: string | null
           created_at: string | null
+          estado: string | null
           id: string
           nome: string
+          numero: string | null
+          rua: string | null
           telefone: string
         }
         Insert: {
+          bairro?: string | null
+          cep?: string | null
+          complemento?: string | null
           created_at?: string | null
+          estado?: string | null
           id: string
           nome: string
+          numero?: string | null
+          rua?: string | null
           telefone: string
         }
         Update: {
+          bairro?: string | null
+          cep?: string | null
+          complemento?: string | null
           created_at?: string | null
+          estado?: string | null
           id?: string
           nome?: string
+          numero?: string | null
+          rua?: string | null
           telefone?: string
         }
         Relationships: []
