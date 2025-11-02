@@ -76,12 +76,34 @@ const OrderQueue = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: 'em preparo' | 'pronto') => {
-    if (!hasActiveShift && newStatus === 'em preparo') {
-      toast.error('Você precisa iniciar seu turno antes de começar a preparar pedidos');
-      return;
-    }
-
     try {
+      // Se não tiver turno ativo e está tentando iniciar preparo, inicia o turno primeiro
+      if (!hasActiveShift && newStatus === 'em preparo' && user) {
+        const now = new Date();
+        
+        // Registrar ponto
+        const { error: pontoError } = await supabase
+          .from('ponto_funcionarios')
+          .insert({
+            usuario_id: user.id,
+            hora_entrada: now.toISOString(),
+            data: now.toISOString().split('T')[0],
+          });
+
+        if (pontoError) throw pontoError;
+
+        // Atualizar ponto_em_aberto
+        const { error: updateUserError } = await supabase
+          .from('usuarios')
+          .update({ ponto_em_aberto: true })
+          .eq('id', user.id);
+
+        if (updateUserError) throw updateUserError;
+
+        setHasActiveShift(true);
+        toast.success('Turno iniciado automaticamente');
+      }
+
       const updates: any = { status: newStatus };
       if (newStatus === 'em preparo' && user) {
         updates.pizzaiolo_id = user.id;
@@ -96,7 +118,7 @@ const OrderQueue = () => {
       toast.success(`Pedido atualizado para: ${newStatus}`);
     } catch (error: any) {
       console.error('Error updating order:', error);
-      toast.error('Erro ao atualizar pedido');
+      toast.error('Erro ao atualizar pedido: ' + error.message);
     }
   };
 
@@ -174,11 +196,10 @@ const OrderQueue = () => {
                 {order.status === 'pendente' && (
                   <Button
                     onClick={() => updateOrderStatus(order.id, 'em preparo')}
-                    disabled={!hasActiveShift}
-                    className="gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50"
+                    className="gap-2 bg-primary hover:bg-primary-hover"
                   >
                     <ChefHat className="w-4 h-4" />
-                    Iniciar Preparo
+                    {!hasActiveShift ? 'Iniciar Turno e Preparo' : 'Iniciar Preparo'}
                   </Button>
                 )}
                 {order.status === 'em preparo' && (
@@ -191,11 +212,6 @@ const OrderQueue = () => {
                   </Button>
                 )}
               </div>
-              {!hasActiveShift && order.status === 'pendente' && (
-                <p className="text-sm text-amber-500 mt-2">
-                  ⚠️ Inicie seu turno para começar a preparar pedidos
-                </p>
-              )}
             </CardContent>
           </Card>
         ))}
