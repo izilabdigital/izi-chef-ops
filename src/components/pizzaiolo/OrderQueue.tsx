@@ -12,9 +12,11 @@ const OrderQueue = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasActiveShift, setHasActiveShift] = useState(false);
 
   useEffect(() => {
     fetchOrders();
+    checkActiveShift();
     
     // Subscribe to real-time updates
     const channel = supabase
@@ -38,6 +40,23 @@ const OrderQueue = () => {
     };
   }, []);
 
+  const checkActiveShift = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('ponto_em_aberto')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      setHasActiveShift(data?.ponto_em_aberto || false);
+    } catch (error: any) {
+      console.error('Error checking shift status:', error);
+    }
+  };
+
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -57,6 +76,11 @@ const OrderQueue = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: 'em preparo' | 'pronto') => {
+    if (!hasActiveShift && newStatus === 'em preparo') {
+      toast.error('Você precisa iniciar seu turno antes de começar a preparar pedidos');
+      return;
+    }
+
     try {
       const updates: any = { status: newStatus };
       if (newStatus === 'em preparo' && user) {
@@ -150,7 +174,8 @@ const OrderQueue = () => {
                 {order.status === 'pendente' && (
                   <Button
                     onClick={() => updateOrderStatus(order.id, 'em preparo')}
-                    className="gap-2 bg-primary hover:bg-primary-hover"
+                    disabled={!hasActiveShift}
+                    className="gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50"
                   >
                     <ChefHat className="w-4 h-4" />
                     Iniciar Preparo
@@ -166,6 +191,11 @@ const OrderQueue = () => {
                   </Button>
                 )}
               </div>
+              {!hasActiveShift && order.status === 'pendente' && (
+                <p className="text-sm text-amber-500 mt-2">
+                  ⚠️ Inicie seu turno para começar a preparar pedidos
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}

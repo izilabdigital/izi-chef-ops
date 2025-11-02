@@ -57,9 +57,17 @@ const TimeTracker = () => {
 
       if (error) throw error;
 
+      // Atualizar ponto_em_aberto na tabela usuarios
+      const { error: updateError } = await supabase
+        .from('usuarios')
+        .update({ ponto_em_aberto: true })
+        .eq('id', user!.id);
+
+      if (updateError) throw updateError;
+
       await refreshUser();
       await checkActiveTimeTrack();
-      toast.success('Ponto registrado com sucesso!');
+      toast.success('Turno iniciado com sucesso!');
     } catch (error: any) {
       console.error('Clock in error:', error);
       toast.error('Erro ao registrar entrada');
@@ -80,9 +88,17 @@ const TimeTracker = () => {
 
       if (error) throw error;
 
+      // Atualizar ponto_em_aberto na tabela usuarios
+      const { error: updateError } = await supabase
+        .from('usuarios')
+        .update({ ponto_em_aberto: false })
+        .eq('id', user!.id);
+
+      if (updateError) throw updateError;
+
       await refreshUser();
       await checkActiveTimeTrack();
-      toast.success('Saída registrada com sucesso!');
+      toast.success('Turno encerrado com sucesso!');
     } catch (error: any) {
       console.error('Clock out error:', error);
       toast.error('Erro ao registrar saída');
