@@ -38,7 +38,7 @@ const DeliveryStats = () => {
         .from('pedidos')
         .select('id, total')
         .eq('entregador_id', user.id)
-        .eq('status', 'Entregue')
+        .eq('status', 'entregue')
         .gte('created_at', `${today}T00:00:00`)
         .lte('created_at', `${today}T23:59:59`)
         .returns<{ id: string; total: number }[]>();

@@ -38,7 +38,7 @@ const ProductionStats = () => {
         .from('pedidos')
         .select('id')
         .eq('pizzaiolo_id', user.id)
-        .eq('status', 'Pronto')
+        .eq('status', 'pronto')
         .gte('created_at', `${today}T00:00:00`)
         .lte('created_at', `${today}T23:59:59`)
         .returns<{ id: string }[]>();
