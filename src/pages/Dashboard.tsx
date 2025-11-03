@@ -6,7 +6,7 @@ import DeliveryDriverDashboard from '@/components/dashboards/DeliveryDriverDashb
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, session } = useAuth();
 
   if (loading) {
     return (
@@ -16,7 +16,7 @@ const Dashboard = () => {
     );
   }
 
-  if (!user) {
+  if (!session || !user) {
     return <Navigate to="/login" replace />;
   }
 
