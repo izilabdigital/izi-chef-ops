@@ -180,7 +180,7 @@ const OrderQueue = () => {
                 <p className="text-sm font-medium">Itens:</p>
                 {Array.isArray(order.itens) && order.itens.map((item: any, idx: number) => (
                   <p key={idx} className="text-sm text-muted-foreground">
-                    {item.quantidade}x {item.nome}
+                    {item.quantity}x {item.name} {item.size ? `(${item.size})` : ''}
                   </p>
                 ))}
               </div>
