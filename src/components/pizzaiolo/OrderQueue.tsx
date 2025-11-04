@@ -18,7 +18,7 @@ const OrderQueue = () => {
     fetchOrders();
     checkActiveShift();
     
-    // Subscribe to real-time updates
+    // Subscribe to real-time updates for new and updated orders
     const channel = supabase
       .channel('pizzaiolo-orders')
       .on(
@@ -27,10 +27,15 @@ const OrderQueue = () => {
           event: '*',
           schema: 'public',
           table: 'pedidos',
-          filter: `status=in.(pendente,em preparo)`,
         },
-        () => {
-          fetchOrders();
+        (payload) => {
+          console.log('Real-time update:', payload);
+          // Recarrega apenas quando há novos pedidos ou atualizações relevantes
+          if (payload.eventType === 'INSERT' || 
+              (payload.eventType === 'UPDATE' && 
+               ['pendente', 'em preparo'].includes((payload.new as any)?.status))) {
+            fetchOrders();
+          }
         }
       )
       .subscribe();
@@ -115,10 +120,23 @@ const OrderQueue = () => {
         .eq('id', orderId);
 
       if (error) throw error;
+      
+      // Atualização otimista - remove o pedido da lista imediatamente
+      if (newStatus === 'pronto') {
+        setOrders(orders.filter(order => order.id !== orderId));
+      } else {
+        // Atualiza o status no estado local
+        setOrders(orders.map(order => 
+          order.id === orderId ? { ...order, status: newStatus, pizzaiolo_id: user?.id } : order
+        ));
+      }
+      
       toast.success(`Pedido atualizado para: ${newStatus}`);
     } catch (error: any) {
       console.error('Error updating order:', error);
       toast.error('Erro ao atualizar pedido: ' + error.message);
+      // Em caso de erro, recarrega os pedidos
+      fetchOrders();
     }
   };
 
