@@ -39,6 +39,9 @@ export interface Order {
   subtotal: number;
   taxa_entrega: number;
   user_id?: string;
+  pizzaiolo_id?: string;
+  entregador_id?: string;
+  inicio_preparo?: string;
   created_at: string;
   updated_at: string;
 }

@@ -77,6 +77,51 @@ export type Database = {
         }
         Relationships: []
       }
+      enderecos: {
+        Row: {
+          bairro: string
+          cep: string
+          complemento: string | null
+          created_at: string
+          estado: string
+          id: string
+          is_principal: boolean | null
+          nome_endereco: string
+          numero: string
+          rua: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bairro: string
+          cep: string
+          complemento?: string | null
+          created_at?: string
+          estado: string
+          id?: string
+          is_principal?: boolean | null
+          nome_endereco: string
+          numero: string
+          rua: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bairro?: string
+          cep?: string
+          complemento?: string | null
+          created_at?: string
+          estado?: string
+          id?: string
+          is_principal?: boolean | null
+          nome_endereco?: string
+          numero?: string
+          rua?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       favoritos: {
         Row: {
           created_at: string
@@ -102,6 +147,47 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metricas_producao: {
+        Row: {
+          categoria_pizza: string | null
+          created_at: string
+          fim_preparo: string
+          id: string
+          inicio_preparo: string
+          pedido_id: string
+          pizzaiolo_id: string
+          tempo_preparo_segundos: number
+        }
+        Insert: {
+          categoria_pizza?: string | null
+          created_at?: string
+          fim_preparo: string
+          id?: string
+          inicio_preparo: string
+          pedido_id: string
+          pizzaiolo_id: string
+          tempo_preparo_segundos: number
+        }
+        Update: {
+          categoria_pizza?: string | null
+          created_at?: string
+          fim_preparo?: string
+          id?: string
+          inicio_preparo?: string
+          pedido_id?: string
+          pizzaiolo_id?: string
+          tempo_preparo_segundos?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metricas_producao_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
             referencedColumns: ["id"]
           },
         ]
@@ -330,6 +416,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       usuarios: {
         Row: {
           ativo: boolean
@@ -369,11 +476,23 @@ export type Database = {
     }
     Functions: {
       generate_order_number: { Args: never; Returns: string }
+      get_avg_prep_time_by_pizzaiolo: {
+        Args: { pizzaiolo_uuid: string }
+        Returns: number
+      }
+      get_avg_prep_time_today: { Args: never; Returns: number }
       get_user_role: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_cupom_uso: { Args: { cupom_code: string }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "gerente" | "pizzaiolo" | "entregador" | "cliente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -500,6 +619,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["gerente", "pizzaiolo", "entregador", "cliente"],
+    },
   },
 } as const

@@ -2,21 +2,26 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Order } from '@/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Clock, ChefHat, Check } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import OrderCard from './OrderCard';
+import CategoryFilter from './CategoryFilter';
+import OrderHistory from './OrderHistory';
+import TVMode from './TVMode';
 
 const OrderQueue = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasActiveShift, setHasActiveShift] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [avgPrepTime, setAvgPrepTime] = useState(0);
 
   useEffect(() => {
     fetchOrders();
     checkActiveShift();
+    fetchAvgPrepTime();
     
     // Subscribe to real-time updates for new and updated orders
     const channel = supabase
@@ -44,6 +49,20 @@ const OrderQueue = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const fetchAvgPrepTime = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_avg_prep_time_today');
+
+      if (error) throw error;
+      setAvgPrepTime(data || 0);
+    } catch (error: any) {
+      console.error('Error fetching avg prep time:', error);
+    }
+  };
 
   const checkActiveShift = async () => {
     if (!user) return;
@@ -82,6 +101,11 @@ const OrderQueue = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: 'em preparo' | 'pronto') => {
     try {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const inicioPreparo = newStatus === 'em preparo' ? new Date().toISOString() : order.inicio_preparo;
+
       // Se não tiver turno ativo e está tentando iniciar preparo, inicia o turno primeiro
       if (!hasActiveShift && newStatus === 'em preparo' && user) {
         const now = new Date();
@@ -112,6 +136,7 @@ const OrderQueue = () => {
       const updates: any = { status: newStatus };
       if (newStatus === 'em preparo' && user) {
         updates.pizzaiolo_id = user.id;
+        updates.inicio_preparo = inicioPreparo;
       }
 
       const { error } = await supabase
@@ -120,6 +145,29 @@ const OrderQueue = () => {
         .eq('id', orderId);
 
       if (error) throw error;
+
+      // Se está marcando como pronto, registrar métrica de produção
+      if (newStatus === 'pronto' && user && inicioPreparo) {
+        const fimPreparo = new Date();
+        const tempoPreparoSegundos = Math.floor(
+          (fimPreparo.getTime() - new Date(inicioPreparo).getTime()) / 1000
+        );
+
+        // Extrair categoria da pizza do primeiro item
+        const categoriaPizza = Array.isArray(order.itens) && order.itens[0]?.category;
+
+        await supabase.from('metricas_producao').insert({
+          pedido_id: orderId,
+          pizzaiolo_id: user.id,
+          tempo_preparo_segundos: tempoPreparoSegundos,
+          inicio_preparo: inicioPreparo,
+          fim_preparo: fimPreparo.toISOString(),
+          categoria_pizza: categoriaPizza,
+        });
+
+        // Atualizar tempo médio
+        fetchAvgPrepTime();
+      }
       
       // Atualização otimista - remove o pedido da lista imediatamente
       if (newStatus === 'pronto') {
@@ -127,7 +175,7 @@ const OrderQueue = () => {
       } else {
         // Atualiza o status no estado local
         setOrders(orders.map(order => 
-          order.id === orderId ? { ...order, status: newStatus, pizzaiolo_id: user?.id } : order
+          order.id === orderId ? { ...order, status: newStatus, pizzaiolo_id: user?.id, inicio_preparo: inicioPreparo } : order
         ));
       }
       
@@ -140,100 +188,82 @@ const OrderQueue = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pendente':
-        return 'bg-status-pending';
-      case 'em preparo':
-        return 'bg-status-preparing';
-      default:
-        return 'bg-muted';
+  // Filtrar pedidos por categoria
+  const getCategoryFromItems = (items: any[]): string | null => {
+    if (!Array.isArray(items) || items.length === 0) return null;
+    
+    const firstItem = items[0];
+    if (firstItem?.category) return firstItem.category;
+    
+    // Se não tiver categoria, tentar inferir do nome
+    const name = firstItem?.name?.toLowerCase() || '';
+    if (name.includes('doce') || name.includes('chocolate') || name.includes('brigadeiro')) {
+      return 'doce';
     }
+    if (name.includes('especial') || name.includes('premium')) {
+      return 'especial';
+    }
+    if (items.length > 1) {
+      return 'meio-a-meio';
+    }
+    return 'classica';
   };
+
+  const filteredOrders = selectedCategory
+    ? orders.filter(order => getCategoryFromItems(order.itens) === selectedCategory)
+    : orders;
 
   if (loading) {
     return <div className="text-center py-8">Carregando pedidos...</div>;
   }
 
-  if (orders.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          Nenhum pedido pendente no momento
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-foreground">Fila de Pedidos</h2>
-      <div className="grid gap-4">
-        {orders.map((order) => (
-          <Card key={order.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <span>Pedido #{order.numero_pedido}</span>
-                  <Badge className={getStatusColor(order.status)}>
-                    {order.status}
-                  </Badge>
-                </CardTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4" />
-                  {new Date(order.created_at).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="font-semibold">{order.nome}</p>
-                <p className="text-sm text-muted-foreground">{order.telefone}</p>
-              </div>
-              
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Itens:</p>
-                {Array.isArray(order.itens) && order.itens.map((item: any, idx: number) => (
-                  <p key={idx} className="text-sm text-muted-foreground">
-                    {item.quantity}x {item.name} {item.size ? `(${item.size})` : ''}
-                  </p>
-                ))}
-              </div>
-
-              {order.complemento && (
-                <div>
-                  <p className="text-sm font-medium">Observações:</p>
-                  <p className="text-sm text-muted-foreground">{order.complemento}</p>
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                {order.status === 'pendente' && (
-                  <Button
-                    onClick={() => updateOrderStatus(order.id, 'em preparo')}
-                    className="gap-2 bg-primary hover:bg-primary-hover"
-                  >
-                    <ChefHat className="w-4 h-4" />
-                    {!hasActiveShift ? 'Iniciar Turno e Preparo' : 'Iniciar Preparo'}
-                  </Button>
-                )}
-                {order.status === 'em preparo' && (
-                  <Button
-                    onClick={() => updateOrderStatus(order.id, 'pronto')}
-                    className="gap-2 bg-status-ready hover:opacity-90"
-                  >
-                    <Check className="w-4 h-4" />
-                    Marcar como Pronto
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">Gestão de Pedidos</h2>
+        <TVMode avgPrepTime={avgPrepTime} />
       </div>
+
+      <Tabs defaultValue="queue" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="queue">Fila de Pedidos</TabsTrigger>
+          <TabsTrigger value="history">Histórico</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="queue" className="space-y-4">
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+
+          {filteredOrders.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                {selectedCategory 
+                  ? 'Nenhum pedido encontrado nesta categoria'
+                  : 'Nenhum pedido pendente no momento'
+                }
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {filteredOrders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onUpdateStatus={updateOrderStatus}
+                  hasActiveShift={hasActiveShift}
+                  avgPrepTime={avgPrepTime}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="history">
+          <OrderHistory />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
