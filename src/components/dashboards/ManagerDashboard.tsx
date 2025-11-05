@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Pizza, DollarSign, Package } from 'lucide-react';
+import { Users, Pizza, DollarSign, Package, UserCog } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import EmployeeManagement from '@/components/manager/EmployeeManagement';
 import MenuManagement from '@/components/manager/MenuManagement';
 import FinancesDashboard from '@/components/manager/FinancesDashboard';
 import OrdersOverview from '@/components/manager/OrdersOverview';
+import { StaffManagement } from '@/components/manager/StaffManagement';
 
 const ManagerDashboard = () => {
   const { user } = useAuth();
@@ -22,7 +22,7 @@ const ManagerDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview" className="gap-2">
               <Package className="w-4 h-4" />
               Visão Geral
@@ -30,6 +30,10 @@ const ManagerDashboard = () => {
             <TabsTrigger value="employees" className="gap-2">
               <Users className="w-4 h-4" />
               Funcionários
+            </TabsTrigger>
+            <TabsTrigger value="staff" className="gap-2">
+              <UserCog className="w-4 h-4" />
+              Gestão
             </TabsTrigger>
             <TabsTrigger value="menu" className="gap-2">
               <Pizza className="w-4 h-4" />
@@ -47,6 +51,10 @@ const ManagerDashboard = () => {
 
           <TabsContent value="employees">
             <EmployeeManagement />
+          </TabsContent>
+
+          <TabsContent value="staff">
+            <StaffManagement />
           </TabsContent>
 
           <TabsContent value="menu">

@@ -65,3 +65,40 @@ export interface MenuItem {
   imagem_url?: string;
   created_at?: string;
 }
+
+export interface Escala {
+  id: string;
+  usuario_id: string;
+  data: string;
+  turno: 'manha' | 'tarde' | 'noite';
+  hora_inicio: string;
+  hora_fim: string;
+  ativo: boolean;
+  created_at: string;
+  updated_at: string;
+  usuario?: User;
+}
+
+export interface MensagemInterna {
+  id: string;
+  titulo: string;
+  mensagem: string;
+  remetente_id: string;
+  destinatario_cargo?: 'gerente' | 'pizzaiolo' | 'entregador' | 'todos';
+  prioridade: 'baixa' | 'normal' | 'alta';
+  lida: boolean;
+  expira_em?: string;
+  created_at: string;
+  remetente?: User;
+}
+
+export interface FuncionarioMes {
+  id: string;
+  usuario_id: string;
+  mes: number;
+  ano: number;
+  pontuacao: number;
+  metricas: any;
+  created_at: string;
+  usuario?: User;
+}
