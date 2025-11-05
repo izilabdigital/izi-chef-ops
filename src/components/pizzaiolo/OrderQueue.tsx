@@ -35,12 +35,8 @@ const OrderQueue = () => {
         },
         (payload) => {
           console.log('Real-time update:', payload);
-          // Recarrega apenas quando há novos pedidos ou atualizações relevantes
-          if (payload.eventType === 'INSERT' || 
-              (payload.eventType === 'UPDATE' && 
-               ['pendente', 'em preparo'].includes((payload.new as any)?.status))) {
-            fetchOrders();
-          }
+          fetchOrders();
+          fetchAvgPrepTime();
         }
       )
       .subscribe();

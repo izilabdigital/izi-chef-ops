@@ -29,12 +29,9 @@ const Login = () => {
 
     try {
       await signIn(email, password);
-      // Aguardar um pouco para garantir que a sessão está carregada
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 100);
     } catch (error) {
       console.error('Login failed:', error);
+    } finally {
       setIsLoading(false);
     }
   };
