@@ -204,6 +204,7 @@ export type Database = {
           estado: string
           forma_pagamento: string
           id: string
+          inicio_preparo: string | null
           itens: Json
           nome: string
           numero: string
@@ -229,6 +230,7 @@ export type Database = {
           estado: string
           forma_pagamento: string
           id?: string
+          inicio_preparo?: string | null
           itens: Json
           nome: string
           numero: string
@@ -254,6 +256,7 @@ export type Database = {
           estado?: string
           forma_pagamento?: string
           id?: string
+          inicio_preparo?: string | null
           itens?: Json
           nome?: string
           numero?: string
