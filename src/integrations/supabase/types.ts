@@ -122,6 +122,50 @@ export type Database = {
         }
         Relationships: []
       }
+      escalas: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          data: string
+          hora_fim: string
+          hora_inicio: string
+          id: string
+          turno: string
+          updated_at: string
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          data: string
+          hora_fim: string
+          hora_inicio: string
+          id?: string
+          turno: string
+          updated_at?: string
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          data?: string
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          turno?: string
+          updated_at?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escalas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favoritos: {
         Row: {
           created_at: string
@@ -147,6 +191,88 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funcionario_mes: {
+        Row: {
+          ano: number
+          created_at: string
+          id: string
+          mes: number
+          metricas: Json
+          pontuacao: number
+          usuario_id: string
+        }
+        Insert: {
+          ano: number
+          created_at?: string
+          id?: string
+          mes: number
+          metricas?: Json
+          pontuacao: number
+          usuario_id: string
+        }
+        Update: {
+          ano?: number
+          created_at?: string
+          id?: string
+          mes?: number
+          metricas?: Json
+          pontuacao?: number
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_mes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mensagens_internas: {
+        Row: {
+          created_at: string
+          destinatario_cargo: string | null
+          expira_em: string | null
+          id: string
+          lida: boolean
+          mensagem: string
+          prioridade: string
+          remetente_id: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          destinatario_cargo?: string | null
+          expira_em?: string | null
+          id?: string
+          lida?: boolean
+          mensagem: string
+          prioridade?: string
+          remetente_id: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string
+          destinatario_cargo?: string | null
+          expira_em?: string | null
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          prioridade?: string
+          remetente_id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_internas_remetente_id_fkey"
+            columns: ["remetente_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
