@@ -59,8 +59,28 @@ const DeliveryQueue = () => {
   const updateOrderStatus = async (orderId: string, newStatus: 'em rota de entrega' | 'entregue') => {
     try {
       const updates: any = { status: newStatus };
+      
       if (newStatus === 'em rota de entrega' && user) {
         updates.entregador_id = user.id;
+        updates.inicio_rota = new Date().toISOString();
+        
+        // Simular cálculo de distância e tempo (em produção, use uma API real)
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          const estimatedDistance = Math.random() * 8 + 2; // 2-10 km
+          const estimatedTime = Math.round(estimatedDistance * 5 + Math.random() * 10); // ~5min por km
+          updates.distancia_km = estimatedDistance;
+          updates.tempo_estimado_minutos = estimatedTime;
+        }
+
+        // Obter localização do entregador (simulado - use navigator.geolocation em produção)
+        updates.latitude_entregador = -23.5505 + (Math.random() - 0.5) * 0.1;
+        updates.longitude_entregador = -46.6333 + (Math.random() - 0.5) * 0.1;
+        
+        toast.success('Rota iniciada! Boa entrega!');
+      } else if (newStatus === 'entregue') {
+        updates.fim_rota = new Date().toISOString();
+        toast.success('Entrega concluída com sucesso!');
       }
 
       const { error } = await supabase
@@ -69,7 +89,6 @@ const DeliveryQueue = () => {
         .eq('id', orderId);
 
       if (error) throw error;
-      toast.success(`Pedido atualizado para: ${newStatus}`);
     } catch (error: any) {
       console.error('Error updating order:', error);
       toast.error('Erro ao atualizar entrega');
@@ -145,6 +164,16 @@ const DeliveryQueue = () => {
                 <p className="text-sm text-muted-foreground">{order.forma_pagamento}</p>
               </div>
 
+              {order.tempo_estimado_minutos && order.status === 'em rota de entrega' && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-4 h-4" />
+                  <span>Tempo estimado: {order.tempo_estimado_minutos} min</span>
+                  {order.distancia_km && (
+                    <span className="ml-2">• Distância: {order.distancia_km.toFixed(1)} km</span>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-2">
                 {order.status === 'pronto' && (
                   <Button
@@ -152,7 +181,7 @@ const DeliveryQueue = () => {
                     className="gap-2 bg-status-delivering hover:opacity-90"
                   >
                     <Truck className="w-4 h-4" />
-                    Iniciar Entrega
+                    Iniciar Rota
                   </Button>
                 )}
                 {order.status === 'em rota de entrega' && (
@@ -161,7 +190,7 @@ const DeliveryQueue = () => {
                     className="gap-2 bg-status-completed hover:opacity-90"
                   >
                     <CheckCircle className="w-4 h-4" />
-                    Confirmar Entrega
+                    Finalizar Entrega
                   </Button>
                 )}
               </div>

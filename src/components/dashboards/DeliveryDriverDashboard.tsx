@@ -3,6 +3,9 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import DeliveryQueue from '@/components/delivery/DeliveryQueue';
 import TimeTracker from '@/components/shared/TimeTracker';
 import DeliveryStats from '@/components/delivery/DeliveryStats';
+import DeliveryMap from '@/components/delivery/DeliveryMap';
+import DeliveryHistory from '@/components/delivery/DeliveryHistory';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DeliveryDriverDashboard = () => {
   const { user } = useAuth();
@@ -19,7 +22,26 @@ const DeliveryDriverDashboard = () => {
         </div>
 
         <DeliveryStats />
-        <DeliveryQueue />
+
+        <Tabs defaultValue="entregas" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="entregas">Entregas</TabsTrigger>
+            <TabsTrigger value="mapa">Mapa</TabsTrigger>
+            <TabsTrigger value="historico">Histórico</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="entregas" className="space-y-6">
+            <DeliveryQueue />
+          </TabsContent>
+
+          <TabsContent value="mapa" className="space-y-6">
+            <DeliveryMap />
+          </TabsContent>
+
+          <TabsContent value="historico" className="space-y-6">
+            <DeliveryHistory />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

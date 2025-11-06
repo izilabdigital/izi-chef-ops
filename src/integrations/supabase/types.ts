@@ -326,12 +326,17 @@ export type Database = {
           created_at: string
           cupom: string | null
           desconto: number | null
+          distancia_km: number | null
           entregador_id: string | null
           estado: string
+          fim_rota: string | null
           forma_pagamento: string
           id: string
           inicio_preparo: string | null
+          inicio_rota: string | null
           itens: Json
+          latitude_entregador: number | null
+          longitude_entregador: number | null
           nome: string
           numero: string
           numero_pedido: string
@@ -341,6 +346,7 @@ export type Database = {
           subtotal: number
           taxa_entrega: number
           telefone: string
+          tempo_estimado_minutos: number | null
           total: number
           updated_at: string
           user_id: string | null
@@ -352,12 +358,17 @@ export type Database = {
           created_at?: string
           cupom?: string | null
           desconto?: number | null
+          distancia_km?: number | null
           entregador_id?: string | null
           estado: string
+          fim_rota?: string | null
           forma_pagamento: string
           id?: string
           inicio_preparo?: string | null
+          inicio_rota?: string | null
           itens: Json
+          latitude_entregador?: number | null
+          longitude_entregador?: number | null
           nome: string
           numero: string
           numero_pedido: string
@@ -367,6 +378,7 @@ export type Database = {
           subtotal: number
           taxa_entrega: number
           telefone: string
+          tempo_estimado_minutos?: number | null
           total: number
           updated_at?: string
           user_id?: string | null
@@ -378,12 +390,17 @@ export type Database = {
           created_at?: string
           cupom?: string | null
           desconto?: number | null
+          distancia_km?: number | null
           entregador_id?: string | null
           estado?: string
+          fim_rota?: string | null
           forma_pagamento?: string
           id?: string
           inicio_preparo?: string | null
+          inicio_rota?: string | null
           itens?: Json
+          latitude_entregador?: number | null
+          longitude_entregador?: number | null
           nome?: string
           numero?: string
           numero_pedido?: string
@@ -393,6 +410,7 @@ export type Database = {
           subtotal?: number
           taxa_entrega?: number
           telefone?: string
+          tempo_estimado_minutos?: number | null
           total?: number
           updated_at?: string
           user_id?: string | null
