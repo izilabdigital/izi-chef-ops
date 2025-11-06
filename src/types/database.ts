@@ -42,12 +42,6 @@ export interface Order {
   pizzaiolo_id?: string;
   entregador_id?: string;
   inicio_preparo?: string;
-  inicio_rota?: string;
-  fim_rota?: string;
-  latitude_entregador?: number;
-  longitude_entregador?: number;
-  distancia_km?: number;
-  tempo_estimado_minutos?: number;
   created_at: string;
   updated_at: string;
 }
