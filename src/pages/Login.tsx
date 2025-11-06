@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,23 +37,32 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-background p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <CardHeader className="space-y-4 text-center pb-8">
-          <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-lg">
-            <Pizza className="w-12 h-12 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+      
+      <Card className="w-full max-w-md shadow-xl border relative z-10 backdrop-blur-sm bg-card/95">
+        <CardHeader className="space-y-6 text-center pb-6">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary-hover rounded-2xl flex items-center justify-center shadow-lg">
+            <Pizza className="w-10 h-10 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-3xl font-bold text-primary">Izi Chefe</CardTitle>
-            <CardDescription className="text-lg mt-2">Sistema de Produção</CardDescription>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+              Izi Chefe
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
+              Sistema de Produção de Pizzas
+            </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="pb-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-base">E-mail</Label>
+              <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   id="email"
                   type="email"
@@ -62,14 +71,14 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-10 h-12"
+                  className="pl-10 h-11 border-input focus:border-primary focus:ring-primary"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-base">Senha</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   id="password"
                   type="password"
@@ -78,26 +87,36 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-10 h-12"
+                  className="pl-10 h-11 border-input focus:border-primary focus:ring-primary"
                 />
               </div>
             </div>
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary-hover transition-all"
+              className="w-full h-11 text-base font-semibold bg-gradient-to-r from-primary to-primary-hover hover:opacity-90 transition-all shadow-md"
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
 
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Não tem uma conta?{' '}
-                <Link to="/register" className="text-primary hover:underline font-medium">
-                  Criar conta
-                </Link>
-              </p>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Novo por aqui?</span>
+              </div>
             </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11"
+              onClick={() => navigate('/register')}
+              disabled={isLoading}
+            >
+              Criar conta
+            </Button>
           </form>
         </CardContent>
       </Card>
